@@ -11,9 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,29 +32,22 @@ public class Account implements java.io.Serializable {
 
 	@Id
 	@Column(name = "acco_id", unique = true, nullable = false)
-	@NotNull
 	private String accoId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cust_id")
-	@NotNull
 	private Customer customer;
 
-	@NotNull
 	@Column(name = "balance", nullable = false)
 	private Double balance;
-	@NotNull
-	@NotEmpty
-	@Size(max = 255)
+
 	@Column(name = "enable", nullable = false)
 	private String enable;
-	@NotNull
-	@NotEmpty
-	@Size(max = 255)
+
 	@Column(name = "password", nullable = false)
 	private String password;
-	@NotNull
-	@Column(name = "version", nullable = false)
+	
+	@Column(name = "version", nullable = true)
 	private Long version;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "account")

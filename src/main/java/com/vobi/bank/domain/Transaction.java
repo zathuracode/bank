@@ -9,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,24 +28,23 @@ public class Transaction implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 	@Id
 	@Column(name = "tran_id", unique = true, nullable = false)
-	@NotNull
 	private Integer tranId;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "acco_id")
-	@NotNull
 	private Account account;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "trty_id")
-	@NotNull
 	private TransactionType transactionType;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_email")
-	@NotNull
 	private Users users;
-	@NotNull
+
 	@Column(name = "amount", nullable = false)
 	private Double amount;
-	@NotNull
+
 	@Column(name = "date", nullable = false)
 	private Date date;
 }

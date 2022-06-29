@@ -1,5 +1,5 @@
 -- dgomez@vortexbird.com
--- 11/20/2020
+-- 01/31/2021
 
 insert into transaction (acco_id, amount, date, user_email, trty_id) values ('4640-0341-9387-5781', 160894372, '2017-02-12', 'jhume8@sourceforge.net', 1);
 insert into transaction (acco_id, amount, date, user_email, trty_id) values ('1630-2511-2937-7299', 333856193, '2016-12-02', 'jhume8@sourceforge.net', 2);

@@ -11,9 +11,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,39 +44,47 @@ public class Customer implements java.io.Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "doty_id")
 	@NotNull
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 
 	private DocumentType documentType;
 
-	@NotNull
-	@NotEmpty
-	@Size(max = 255)
 	@Column(name = "address", nullable = false)
-	private String address;
 	@NotNull
-	@NotEmpty
-	@Size(max = 255)
+	@Size(min = 3, max = 100)
+	private String address;
+
+	@NotNull
+	@Email
 	@Column(name = "email", nullable = false)
 	private String email;
+
 	@NotNull
-	@NotEmpty
-	@Size(max = 255)
+	@Size(min = 1,max = 1)
 	@Column(name = "enable", nullable = false)
 	private String enable;
+
 	@NotNull
-	@NotEmpty
-	@Size(max = 255)
+	@Size(min = 1,max = 100)
 	@Column(name = "name", nullable = false)
 	private String name;
+
 	@NotNull
-	@NotEmpty
-	@Size(max = 255)
+	@Size(min = 1,max = 100)
 	@Column(name = "phone", nullable = false)
 	private String phone;
+	
+	@NotNull
+	@Size(min = 1,max = 100)
 	@Column(name = "token")
 	private String token;
 
+	
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+	@JsonIgnore
 	private List<Account> accounts = new ArrayList<>();
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+	@JsonIgnore
 	private List<RegisteredAccount> registeredAccounts = new ArrayList<>();
 
 }

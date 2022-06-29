@@ -9,47 +9,34 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vobi.bank.domain.Account;
 import com.vobi.bank.domain.Customer;
-import com.vobi.bank.domain.RegisteredAccount;
-import com.vobi.bank.exception.ZMessManager;
 import com.vobi.bank.repository.CustomerRepository;
-import com.vobi.bank.utility.Utilities;
 
-import lombok.extern.slf4j.Slf4j;
-
-/**
- * @author Zathura Code Generator Version 9.0 http://zathuracode.org/
- *         www.zathuracode.org
- * 
- */
-
-@Scope("singleton")
 @Service
-@Slf4j
 public class CustomerServiceImpl implements CustomerService {
-
+	
 	@Autowired
-	private CustomerRepository customerRepository;
-
+	CustomerRepository customerRepository;
+	
 	@Autowired
-	private Validator validator;
+	Validator validator;
 
 	@Override
-	public void validate(Customer customer) throws ConstraintViolationException {
-
-		Set<ConstraintViolation<Customer>> constraintViolations = validator.validate(customer);
-		if (!constraintViolations.isEmpty()) {
-			throw new ConstraintViolationException(constraintViolations);
-		}
-
+	@Transactional(readOnly = true)
+	public List<Customer> findAll() {
+		return customerRepository.findAll();
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Customer> findById(Integer id) {
+		return customerRepository.findById(id);
+	}
+	
 	@Override
 	@Transactional(readOnly = true)
 	public Long count() {
@@ -57,101 +44,84 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public List<Customer> findAll() {
-		log.debug("finding all Customer instances");
-		return customerRepository.findAll();
+	@Transactional(readOnly = false,propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+	public Customer save(Customer customer) throws Exception {
+		if(customer==null) {
+			throw new Exception("El customer es nulo");
+		}
+		
+		validate(customer);
+		
+		if(customerRepository.existsById(customer.getCustId())) {
+			throw new Exception("El customer ya existe");
+		}
+		
+		return customerRepository.save(customer);
 	}
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public Customer save(Customer entity) throws Exception {
-		log.debug("saving Customer instance");
-
-		if (entity == null) {
-			throw new ZMessManager().new NullEntityExcepcion("Customer");
+	@Transactional(readOnly = false,propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+	public Customer update(Customer customer) throws Exception {
+		if(customer==null) {
+			throw new Exception("El customer es nulo");
 		}
-
-		validate(entity);
-
-		if (customerRepository.existsById(entity.getCustId())) {
-			throw new ZMessManager(ZMessManager.ENTITY_WITHSAMEKEY);
+		
+		validate(customer);
+		
+		if(customerRepository.existsById(customer.getCustId())==false) {
+			throw new Exception("El customer no existe");
 		}
-
-		return customerRepository.save(entity);
-
+		
+		return customerRepository.save(customer);
 	}
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public void delete(Customer entity) throws Exception {
-		log.debug("deleting Customer instance");
-
-		if (entity == null) {
-			throw new ZMessManager().new NullEntityExcepcion("Customer");
+	@Transactional(readOnly = false,propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+	public void delete(Customer customer) throws Exception {
+		if(customer==null) {
+			throw new Exception("El customer es nulo");
 		}
-
-		if (entity.getCustId() == null) {
-			throw new ZMessManager().new EmptyFieldException("custId");
+		
+		if(customer.getCustId()==null) {
+			throw new Exception("El customer id es nulo");
 		}
-
-		if (customerRepository.existsById(entity.getCustId()) == false) {
-			throw new ZMessManager(ZMessManager.ENTITY_WITHSAMEKEY);
+		
+		if(customerRepository.existsById(customer.getCustId())==false) {
+			throw new Exception("El customer no existe");
 		}
-
-		findById(entity.getCustId()).ifPresent(entidad -> {
-			List<Account> accounts = entidad.getAccounts();
-			if (Utilities.validationsList(accounts) == true) {
-				throw new ZMessManager().new DeletingException("accounts");
+		
+		findById(customer.getCustId()).ifPresent(entity->{
+			if(customer.getAccounts()!=null && customer.getAccounts().isEmpty()==false) {
+				throw new RuntimeException("El customer tiene accounts");
 			}
-			List<RegisteredAccount> registeredAccounts = entidad.getRegisteredAccounts();
-			if (Utilities.validationsList(registeredAccounts) == true) {
-				throw new ZMessManager().new DeletingException("registeredAccounts");
+			if(customer.getRegisteredAccounts()!=null && customer.getRegisteredAccounts().isEmpty()==false) {
+				throw new RuntimeException("El customer tiene RegisteredAccounts");
 			}
 		});
-
-		customerRepository.deleteById(entity.getCustId());
-		log.debug("delete Customer successful");
-
+		
+		customerRepository.delete(customer);		
 	}
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	@Transactional(readOnly = false,propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
 	public void deleteById(Integer id) throws Exception {
-		log.debug("deleting Customer instance");
-		if (id == null) {
-			throw new ZMessManager().new EmptyFieldException("custId");
+		if(id==null) {
+			throw new Exception("El id es nulo");
 		}
-		if (customerRepository.existsById(id)) {
-			delete(customerRepository.findById(id).get());
+		
+		if(customerRepository.existsById(id)==false) {
+			throw new Exception("El customer no existe");
 		}
+		
+		delete(customerRepository.getById(id));		
 	}
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public Customer update(Customer entity) throws Exception {
-
-		log.debug("updating Customer instance");
-
-		if (entity == null) {
-			throw new ZMessManager().new NullEntityExcepcion("Customer");
-		}
-
-		validate(entity);
-
-		if (customerRepository.existsById(entity.getCustId()) == false) {
-			throw new ZMessManager(ZMessManager.ENTITY_WITHSAMEKEY);
-		}
-
-		return customerRepository.save(entity);
-
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Optional<Customer> findById(Integer custId) {
-		log.debug("getting Customer instance");
-		return customerRepository.findById(custId);
+	public void validate(Customer entity) throws Exception {
+		Set<ConstraintViolation<Customer>> constraintViolations=validator.validate(entity);
+		if(constraintViolations.isEmpty()==false) {
+			throw new ConstraintViolationException(constraintViolations);
+		}		
 	}
 
 }
